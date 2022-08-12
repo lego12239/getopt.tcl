@@ -63,7 +63,8 @@ set optsspec {"-v --version" 0
 The second argument to getopt::mkctx proc is optional and, if exists, must be
 a dict with parameters:
 
-- err_on_unknown_opt, boolean: throw en error on unknown option
+- err_on_unknown_opt, boolean, 0 by default:
+  throw en error on unknown option
 
 After we create a context, we can parse options with getopt::next routine.
 The first argument is a context variable name and the second one is a name of
