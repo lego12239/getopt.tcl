@@ -280,4 +280,4 @@ proc _get_ospec {_ctx oname} {
 }
 }
 
-package provide getopt 1.0
+package provide getopt 1.0.1
