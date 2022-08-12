@@ -1,0 +1,206 @@
+lappend auto_path [pwd]/../
+package require tcltest
+package require getopt
+
+tcltest::test short_opt-1.0 {
+	empty spec, 2 opts
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -v"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {-v}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test short_opt-2.0 {
+	empty spec, 0 opts
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts ""
+	if {[getopt::next ctx opts] ne {}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test short_opt-3.0 {
+	spec with 2 entry, 0 opts
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts ""
+	if {[getopt::next ctx opts] ne {}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test short_opt-3.1 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {-d}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test short_opt-3.2 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test short_opt-3.3 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d -b -D -e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 4
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 5
+	}
+	return 0
+} -result 0
+
+if {0} {
+tcltest::test kv-3.0 {
+	simple key value pair with wrong chars(")
+} -body {
+	conf::load_from_str "k\"1  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: 'k'#6(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]
+possible unclosed quotes at 1 line"
+
+tcltest::test kv-3.1 {
+	simple key value pair with wrong chars([)
+} -body {
+	conf::load_from_str "k\[1  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: 'k'#6(L1) '\['#4(L1) '1'#6(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]
+token input buffer: '  =  v1'"
+
+tcltest::test kv-3.2 {
+	simple key value pair with wrong chars(])
+} -body {
+	conf::load_from_str "k\]1  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: 'k'#6(L1) ']'#5(L1) '1'#6(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]
+token input buffer: '  =  v1'"
+
+tcltest::test kv-3.3 "
+	simple key value pair with wrong chars({)
+" -body {
+	conf::load_from_str "k 1 \{  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: 'k'#6(L1) '1'#6(L1) '{'#2(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]
+token input buffer: '  =  v1'"
+
+tcltest::test kv-3.4 "
+	simple key value pair with wrong chars(})
+" -body {
+	conf::load_from_str "k\}1  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: 'k'#6(L1) '}'#3(L1) '1'#6(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]
+token input buffer: '  =  v1'"
+
+tcltest::test kv-3.5 {
+	simple key value pair with wrong chars( )
+} -body {
+	conf::load_from_str "k 1  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: 'k'#6(L1) '1'#6(L1) '='#1(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]
+token input buffer: '  v1'"
+
+tcltest::test kv-3.6 {
+	simple key value pair with wrong chars(=)
+} -body {
+	conf::load_from_str "k=1  =  v1"
+} -returnCodes error -result "parse error at 1 line: unexpected token sequence at 1 line: '='#1(L1) 'v1'#6(L1)
+ want: KEY = VAL or KEY = \{ or GROUP_NAME \{ or \} or \[GROUP_NAME\]"
+
+tcltest::test kv-4.0 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "k1= \"v1\""
+} -result {k1 v1}
+
+tcltest::test kv-4.1 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "k1= \"v1\"  "
+} -result {k1 v1}
+
+tcltest::test kv-4.2 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "k1= \"v1 \"  "
+} -result {k1 {v1 }}
+
+tcltest::test kv-4.3 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "k1= \" v1 \"  "
+} -result {k1 { v1 }}
+
+tcltest::test kv-4.4 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "k1= \"  v1   \"  "
+} -result {k1 {  v1   }}
+
+tcltest::test kv-4.5 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "\" k1\"= \"  v1   \"  "
+} -result {{ k1} {  v1   }}
+
+tcltest::test kv-4.6 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "\" k1  \"= \"  v1   \"  "
+} -result {{ k1  } {  v1   }}
+
+tcltest::test kv-4.7 {
+	simple key value pair with quotes
+} -body {
+	conf::load_from_str "\" k1  \" = \"  v1   \"  "
+} -result {{ k1  } {  v1   }}
+}
+
+tcltest::cleanupTests

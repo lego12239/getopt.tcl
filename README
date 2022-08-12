@@ -1,0 +1,102 @@
+Overview
+========
+
+A tcl package for parsing command line options(support short options bundling).
+
+Synopsis
+========
+
+getopt::mkctx OPTSSPEC PRMS
+getopt::next CTX_VARNAME ARGV_VARNAME
+
+Description
+===========
+
+At first we need to create a context for getopt work with help of
+getopt::mkctx routine. This proc return a created context(that should be
+passed to another routines) and takes as the first argument an options
+specification. That should be a dict where each key is a string that contains
+option names(with "-" prefix for short option name and "--" prefix for long
+option name) separated by spaces; and each value is a list that contains as
+the first element an option argument type and other elements are private
+data(that willn't be touched by getopt package). An option argument type can
+be:
+
+- 0, for no argument
+- 1, for mandatory argument
+- 2, for optional argument
+
+An optional argument for short option name is all chars right after name to
+the word end. E.g. "-d123" - 123 is an argument for option -d. An optional
+argument for long option name is all chars right after name to the word end,
+separated from the name by "=". E.g. "--debug=11" - 11 is an argument for
+option --debug. Thus, "-d 123" and "--debug 11" treat as option with no
+argument.
+
+Options specification example(from ex2.tcl):
+
+set optsspec {"-v --version" {0 opt_v_proc}
+              "-r" {0 opt_r_proc}
+			  "--sort" {1 opt_sort_proc}
+              "-h --help" {0 opt_h_proc}
+              "-d --debug" {1 opt_d_proc}
+              "-V --verbose" {2 opt_V_proc}}
+
+Here we have 6 options:
+- option "-v", that has a long variant "--version" and type 0;
+- option "-r", that has type 0;
+- option "--sort", that has type 1;
+- option "-h", that has a long variant "--help" and type 0;
+- option "-d", that has a long variant "--debug" and type 1;
+- option "-V", that has a long variant "--verbose" and type 2.
+
+Previous options specification can be simplified(if we need not save private
+data):
+
+set optsspec {"-v --version" 0
+              "-r" 0
+			  "--sort" 1
+              "-h --help" 0
+              "-d --debug" 1
+              "-V --verbose" 2}
+
+The second argument to getopt::mkctx proc is optional and, if exists, must be
+a dict with parameters:
+
+- err_on_unknown_opt, boolean: throw en error on unknown option
+
+After we create a context, we can parse options with getopt::next routine.
+The first argument is a context variable name and the second one is a name of
+a list variable where command line arguments is placed(usually argv).
+Each call of getopt::next returns a next option and its argument(if any) as
+a list. This list contains:
+
+- 2 items: an option name and an option argument
+- 1 item: an option name for option without argument
+- 0 items: if there are no more options
+
+An option name is a key from options specification dict for known options(
+known options are those options that exist in options specification) and
+is just option name(from command line) for unknown options.
+
+RETURN VALUE
+============
+
+getopt::mkctx returns a new context.
+
+getopt::next returns a next (option name, argument) pair as a list. If there is
+an option without argument, then this list contains 1 item - just an option
+name. If there are no more options, then this list contains 0 items. An
+option name is a key from options specification dict for known options and
+is just option name for unknown options.
+
+ERRORS
+======
+
+On error getopt::mkctx and getopt::next are throw an error with errorCode
+list first item equal to 'GETOPT'.
+
+EXAMPLES
+========
+
+See ex1.tcl, ex2.tcl.

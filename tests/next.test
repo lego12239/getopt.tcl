@@ -1,0 +1,1124 @@
+lappend auto_path [pwd]/../
+package require tcltest
+package require getopt
+
+tcltest::test next-1.0 {
+	empty spec, 2 opts
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -v"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {-v}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test next-1.1 {
+	empty spec, 2 opts(glued)
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-av"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {-v}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test next-1.2 {
+	empty spec, 2 opts, with non opts
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "some -a nonopts -v args"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {-v}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "some nonopts args"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-2.0 {
+	empty spec, 0 opts
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts ""
+	if {[getopt::next ctx opts] ne {}} {
+		return 1
+	}
+	if {$opts ne {}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-2.1 {
+	empty spec, 0 opts
+} -body {
+	set optsspec [dict create]
+	set ctx [getopt::mkctx $optsspec]
+	set opts {{}}
+	if {[getopt::next ctx opts] ne {}} {
+		return 1
+	}
+	if {$opts ne {{}}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.0 {
+	spec with 2 entry, 0 opts
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts ""
+	if {[getopt::next ctx opts] ne {}} {
+		return 1
+	}
+	if {$opts ne {}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.1.0 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {-d}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.1.0.1 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o -d m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {-d}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.1.1 {
+	spec with 2 entry, 2 opts(glued)
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-ad"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return -1
+	}
+	if {[getopt::next ctx opts] ne {-d}} {
+		return -1
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.1.1.1 {
+	spec with 2 entry, 2 opts(glued)
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s o -ad m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {-d}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.2.0 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.2.0.1 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o -d m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.2.1 {
+	spec with 2 entry, 2 opts(glued)
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-ad"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.2.1.1 {
+	spec with 2 entry, 2 opts(glued)
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s o -ad m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.3 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d -b -D -e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 4
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-3.3.1 {
+	spec with 2 entry, 2 opts
+} -body {
+	set optsspec [dict create "-d -D" 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-adbD -e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 4
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.0 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -l"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT MAND_ARG_IS_MISSED -l} -result {Mandatory argument for option -l is missed}
+
+tcltest::test next-4.0.1 {
+	mandatory opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-al"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT MAND_ARG_IS_MISSED -l} -result {Mandatory argument for option -l is missed}
+
+tcltest::test next-4.1 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a --log-level"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d -D}}} {
+		return 2
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT MAND_ARG_IS_MISSED --log-level} -result {Mandatory argument for option --log-level is missed}
+
+tcltest::test next-4.2.0 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -l0123 -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.2.0.1 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o -l0123 m -b e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.2.1 {
+	mandatory opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-al0123 -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.3.0 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -l 0123 -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.3.0.1 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o -l 0123 m -b e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.3.1 {
+	mandatory opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-al 0123 -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.3.1.1 {
+	mandatory opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -al 0123 o -b m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.4.0 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a --log-level=0123 -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.4.0.1 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --log-level=0123 m -b e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.4.0.2 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s --unknown o --log-level=0123 m -b e"
+	if {[getopt::next ctx opts] ne {--unknown}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.4.0.3 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s --unknown=value o --log-level=0123 m -b e"
+	if {[getopt::next ctx opts] ne {--unknown}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.5.0 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a --log-level 0123 -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-4.5.0.1 {
+	mandatory opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --log-level 0123 m -b e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} 0123}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.0.0 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o -d m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.0.0.1 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d -b"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.0.1.0 {
+	optional opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -ad o m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.0.1.1 {
+	optional opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -ad o -b m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.1.0 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a --debug"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.1.1 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --debug m -b e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.2 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o -d456 m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug} 456}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.2.1 {
+	optional opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -ad456 o m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug} 456}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.3 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a -d -e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.3.1 {
+	optional opt(glued)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-ad -e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.4 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --debug=456 m -e e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug} 456}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-5.5 {
+	optional opt
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --debug m -e e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-6.0 {
+	opt with no arg
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --version m -e e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-v --version}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	if {$opts ne "s o m e"} {
+		return 5
+	}
+	return 0
+} -result 0
+
+tcltest::test next-6.1 {
+	opt with no arg(but arg is specified)
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -a o --version=123 m -e e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-v --version}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-e}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 4
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT OPT_WITH_ARG} -result "Option '--version' shouldn't has an argument"
+
+tcltest::test next-7.0 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "--"
+	if {[getopt::next ctx opts] ne {}} {
+		return 1
+	}
+	if {$opts ne ""} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-7.1 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -- o -d m -l1 e"
+	if {[getopt::next ctx opts] ne {}} {
+		return 1
+	}
+	if {$opts ne "s o -d m -l1 e"} {
+		return 2
+	}
+	return 0
+} -result 0
+
+tcltest::test next-7.2 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -d -- o m -l1 e"
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 2
+	}
+	if {$opts ne "s o m -l1 e"} {
+		return 3
+	}
+	return 0
+} -result 0
+
+tcltest::test next-7.3 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "s -d --version -- o m -l1 e"
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-v --version}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 3
+	}
+	if {$opts ne "s o m -l1 e"} {
+		return 4
+	}
+	return 0
+} -result 0
+
+tcltest::test next-7.4 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a s -d -b --version -c -- -d o m -l1 e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {{-v --version}}} {
+		return 4
+	}
+	if {[getopt::next ctx opts] ne {-c}} {
+		return 5
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 6
+	}
+	if {$opts ne "s -d o m -l1 e"} {
+		return 7
+	}
+	return 0
+} -result 0
+
+tcltest::test next-7.5 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a s -d o -b m --version e -l -- -d o m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {{-v --version}}} {
+		return 4
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} --}} {
+		return 5
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 6
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 7
+	}
+	if {$opts ne "s o m e o m e"} {
+		return 8
+	}
+	return 0
+} -result 0
+
+tcltest::test next-7.6 {
+	--
+} -body {
+	set optsspec [dict create "-d --debug" 2 "-v --version" 0 "-l --log-level" 1]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-a s -d o -b m --version e --log-level -- -d o m e"
+	if {[getopt::next ctx opts] ne {-a}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 2
+	}
+	if {[getopt::next ctx opts] ne {-b}} {
+		return 3
+	}
+	if {[getopt::next ctx opts] ne {{-v --version}}} {
+		return 4
+	}
+	if {[getopt::next ctx opts] ne {{-l --log-level} --}} {
+		return 5
+	}
+	if {[getopt::next ctx opts] ne {{-d --debug}}} {
+		return 6
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 7
+	}
+	if {$opts ne "s o m e o m e"} {
+		return 8
+	}
+	return 0
+} -result 0
+
+tcltest::test next_err-1.0 {
+	uncompleted short opt
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec]
+	set opts "-"
+	if {[getopt::next ctx opts] ne {}} {
+		return -1
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT UNCOMPLETED_OPT} -result "Uncompleted short option"
+
+tcltest::test next_err-2.0 {
+	wrong opt with err_on_unknown_opt=1
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec {err_on_unknown_opt 1}]
+	set opts "-v s -a o"
+	if {[getopt::next ctx opts] ne {-v}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 2
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT UNKNOWN_OPT} -result "Option '-a' is unknown"
+
+tcltest::test next_err-2.1 {
+	wrong opt with err_on_unknown_opt=1
+} -body {
+	set optsspec [dict create -d 0 -v 0]
+	set ctx [getopt::mkctx $optsspec {err_on_unknown_opt 1}]
+	set opts "-v s --sopt o"
+	if {[getopt::next ctx opts] ne {-v}} {
+		return 1
+	}
+	if {[getopt::next ctx opts] ne {}} {
+		return 2
+	}
+	return 0
+} -returnCodes error -errorCode {GETOPT UNKNOWN_OPT} -result "Option '--sopt' is unknown"
+
+tcltest::cleanupTests
