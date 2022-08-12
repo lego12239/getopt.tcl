@@ -39,3 +39,5 @@ proc opt_V_proc {val} {
 while {[llength [set ov [getopt::next ctx argv]]] > 0} {
 	[lindex [dict get $optsspec [lindex $ov 0]] 1] [lindex $ov 1]
 }
+
+puts "argv now is: $argv"

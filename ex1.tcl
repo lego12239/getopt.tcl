@@ -14,3 +14,5 @@ set ctx [getopt::mkctx $optsspec]
 while {[llength [set ov [getopt::next ctx argv]]] > 0} {
 	puts "([llength $ov])'[lindex $ov 0]'='[lindex $ov 1]'"
 }
+
+puts "argv now is: $argv"
