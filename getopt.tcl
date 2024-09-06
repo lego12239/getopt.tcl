@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Oleg Nemanov <lego12239@yandex.ru>
+# Copyright (c) 2022-2024 Oleg Nemanov <lego12239@yandex.ru>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
