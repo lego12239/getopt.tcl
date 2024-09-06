@@ -1,111 +1,120 @@
-Overview
+OVERVIEW
 ========
 
 A tcl package for parsing command line options(support short options bundling).
 
-Synopsis
+
+SYNOPSIS
 ========
 
-getopt::mkctx OPTSSPEC PRMS
-getopt::next CTX_VARNAME ARGV_VARNAME
+package require getopt
 
-Description
+getopt::parse CALLBACK_CMD ARGV_VARNAME
+getopt::split STRING
+
+
+FEATURES
+========
+
+* short option and long option support
+* short option bundling support
+* options mixed with non-option arguments
+* support of "--" to indicate an options end
+
+
+DESCRIPTION
 ===========
 
-At first we need to create a context for getopt work with help of
-getopt::mkctx routine. This proc return a created context(that should be
-passed to another routines) and takes as the first argument an options
-specification. That should be a dict where each key is a string that contains
-option names(with "-" prefix for short option name and "--" prefix for long
-option name) separated by spaces; and each value is a list that contains as
-the first element an option argument type and other elements are private
-data(that willn't be touched by getopt package). An option argument type can
-be:
-
-- 0, for no argument
-- 1, for mandatory argument
-- 2, for optional argument
-
-An optional argument for short option name is all chars right after name to
-the word end. E.g. "-d123" - 123 is an argument for option -d. An optional
-argument for long option name is all chars right after name to the word end,
-separated from the name by "=". E.g. "--debug=11" - 11 is an argument for
-option --debug. Thus, "-d 123" and "--debug 11" treat as option with no
-argument.
-
-Options specification example(from ex2.tcl):
-
-set optsspec {"-v --version" {0 opt_v_proc}
-              "-r" {0 opt_r_proc}
-			  "--sort" {1 opt_sort_proc}
-              "-h --help" {0 opt_h_proc}
-              "-d --debug" {1 opt_d_proc}
-              "-V --verbose" {2 opt_V_proc}}
-
-Here we have 6 options:
-- option "-v", that has a long variant "--version" and type 0;
-- option "-r", that has type 0;
-- option "--sort", that has type 1;
-- option "-h", that has a long variant "--help" and type 0;
-- option "-d", that has a long variant "--debug" and type 1;
-- option "-V", that has a long variant "--verbose" and type 2.
-
-Previous options specification can be simplified(if we need not save private
-data):
-
-set optsspec {"-v --version" 0
-              "-r" 0
-			  "--sort" 1
-              "-h --help" 0
-              "-d --debug" 1
-              "-V --verbose" 2}
-
-The second argument to getopt::mkctx proc is optional and, if exists, must be
-a dict with parameters:
-
-- err_on_unknown_opt, boolean, 0 by default:
-  throw en error on unknown option
-
-After we create a context, we can parse options with getopt::next routine.
-The first argument is a context variable name and the second one is a name of
-a list variable where command line arguments is placed(usually argv).
-Each call of getopt::next returns a next option and its argument(if any) as
-a list. This list contains:
-
-- 2 items: an option name and an option argument
-- 1 item: an option name for option without argument
-- 0 items: if there are no more options
-
-An option name is a key from options specification dict for known options(
-known options are those options that exist in options specification) and
-is just option name(from command line) for unknown options.
-
-If getopt::next get "--" as a next command line word, then it finish options
-parsing(returns empty list).
+getopt::parse proc is used to parse a list of arguments with options and
+possible option arguments. It accept 2 arguments. The first is a callback
+command - a list with command name and arguments (if needed). This callback
+will be called on every option-value pair found in a list. It must return 0
+if option doesn't have an argument (text parsed as a possible option argument
+is'not used) and return 1 if option have an argument (text parsed as a
+possible option argument is used and must not be further processed). And the
+second argument is a var name of a list variable with arguments.
 
 Every found option(with its argument) is removed from command line items(
 specified in second argument to getopt::next) by getopt::next. Thus, after
 getopt::next finish, a list with command line words contains only non option
 words.
 
+If getopt::parse get "--" as a next command line argument, then it finish
+options parsing and stay intact the next arguments.
+
+Example:
+
+  set argv {-abc arg -d val -l name}
+  getopt::parse {opts_parse priv} argv
+
+will do the next calls in order (assume that opts_parse return 1 only for
+b and d):
+
+- opts_parse priv a bc
+- opts_parse priv b c
+- opts_parse priv d val
+- opts_parse priv l name
+
+argv is {arg name}.
+
+A short option is a letter with dash in front of it. Like "-a". Many
+short options can be bundled together like this: -abDv. This is equal to
+"-a -b -D -v". Short option can have a value specified right after the
+name or separated with space. Like "-a123" or "-a 123", where "123" is the
+value of "a" option.
+
+A long option is a word with two dashes in front of it. Like "--db". Long
+option can have a value specified separated with equal sign or space. Like
+"--db=name" or "--db name", where "name" is the value of "db" option.
+
+getopt::split is used to split a string with arguments into a list of
+arguments. It try to conform to shell style of argument splitting. E.g.
+the string - a bc"d\\e \"fg"hi jkl mno - is splitted to
+{a {bcd\e "fghi} jkl mno} list.
+
+
 RETURN VALUE
 ============
 
-getopt::mkctx returns a new context.
+getopt::parse callback should return 0 if option is not consume the
+specified option argument; or 1 if option is consume it.
 
-getopt::next returns a next (option name, argument) pair as a list. If there is
-an option without argument, then this list contains 1 item - just an option
-name. If there are no more options, then this list contains 0 items. An
-option name is a key from options specification dict for known options and
-is just option name for unknown options.
+getopt::split returns a list with arguments according to shell splitting
+rules.
+
 
 ERRORS
 ======
 
-On error getopt::mkctx and getopt::next are throw an error with errorCode
-list first item equal to 'GETOPT'.
+On error getopt::split is throw an error with first item of errorCode
+list equal to 'GETOPT'.
+
 
 EXAMPLES
 ========
 
-See ex1.tcl, ex2.tcl.
+proc opts_parse {_priv oname oval} {
+	upvar 2 $_priv priv
+
+	switch $oname {
+	b -
+	d {
+		lappend priv [list $oname $oval]
+		return 1
+	}
+	default {
+		lappend priv $oname
+	}
+	}
+
+	return 0
+}
+
+set argv {-abc arg -d val -l name}
+set priv {}
+getopt::parse {opts_parse priv} argv
+puts "opts: $priv"
+puts "argv now is: $argv"
+
+
+See ex1.tcl.
