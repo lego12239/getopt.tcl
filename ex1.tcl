@@ -3,16 +3,25 @@
 lappend auto_path [pwd]
 package require getopt
 
-set optsspec [dict create\
-  "-v --version" 0\
-  "-h --help" 0\
-  "-d --debug" 1\
-  "-V --verbose" 2]
+proc opts_parse {_priv oname oval} {
+ upvar 2 $_priv priv
 
-set ctx [getopt::mkctx $optsspec]
+ switch $oname {
+ b -
+ d {
+  lappend priv [list $oname $oval]
+  return 1
+ }
+ default {
+  lappend priv $oname
+ }
+ }
 
-while {[llength [set ov [getopt::next ctx argv]]] > 0} {
-	puts "([llength $ov])'[lindex $ov 0]'='[lindex $ov 1]'"
+ return 0
 }
 
+set argv {-abc arg -d val -l name}
+set priv {}
+getopt::parse {opts_parse priv} argv
+puts "opts: $priv"
 puts "argv now is: $argv"
