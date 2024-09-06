@@ -1,1 +1,1 @@
-package ifneeded getopt 1.0.2 [list source [file join $dir getopt.tcl]]
+package ifneeded getopt 2.0.0 [list source [file join $dir getopt.tcl]]
