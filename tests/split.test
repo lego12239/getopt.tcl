@@ -1,0 +1,101 @@
+lappend auto_path [pwd]/../
+package require tcltest
+package require getopt
+
+tcltest::test split-1.0 {
+	words
+} -body {
+	getopt::split "-a -b c test -b"
+} -result {-a -b c test -b}
+
+tcltest::test split-1.1 {
+	words
+} -body {
+	getopt::split " -a  -b c  test   -b  "
+} -result {-a -b c test -b}
+
+tcltest::test split-2.0 {
+	quoted words
+} -body {
+	getopt::split " -a  \"-b\" c  test   -b  "
+} -result {-a -b c test -b}
+
+tcltest::test split-2.1 {
+	quoted words with spaces
+} -body {
+	getopt::split " -a  \"-b val\" c  test   -b  "
+} -result {-a {-b val} c test -b}
+
+tcltest::test split-2.2 {
+	quoted words with spaces
+} -body {
+	getopt::split " -a  \"-b val \" c  test   -b  "
+} -result {-a {-b val } c test -b}
+
+tcltest::test split-2.3 {
+	quoted words with spaces
+} -body {
+	getopt::split " -a  \"  -b val \" c  test   -b  "
+} -result {-a {  -b val } c test -b}
+
+tcltest::test split-2.3 {
+	quoted words with spaces at start
+} -body {
+	getopt::split "\" -a\"  \"  -b val \" c  test   -b  "
+} -result {{ -a} {  -b val } c test -b}
+
+tcltest::test split-2.4 {
+	quoted words with spaces at end
+} -body {
+	getopt::split "\" -a\"  \"  -b val \" c  test   \"-b  \""
+} -result {{ -a} {  -b val } c test {-b  }}
+
+tcltest::test split-2.5 {
+	quoted words with spaces with \"
+} -body {
+	getopt::split "-a  \"  -b \\\"val \" c  test   -b"
+} -result {-a {  -b "val } c test -b}
+
+tcltest::test split-2.6 {
+	quoted words with spaces with \\
+} -body {
+	getopt::split "-a  \"  -b \\\"val\\\\ \" c  test   -b"
+} -result {-a {  -b "val\ } c test -b}
+
+tcltest::test split-2.7 {
+	quoted words with spaces with \\\"
+} -body {
+	getopt::split "-a  \"  -b \\\"\\\\val\\\\ \" c  test   -b"
+} -result {-a {  -b "\val\ } c test -b}
+
+tcltest::test split-2.8 {
+	quoted words with spaces with \\ at start
+} -body {
+	getopt::split "-a  \"\\\\  -b \\\"val\\\\ \" c  test   -b"
+} -result {-a {\  -b "val\ } c test -b}
+
+tcltest::test split-2.9 {
+	quoted words with spaces with \" at start
+} -body {
+	getopt::split "-a  \"\\\"  -b \\\"val\\\\ \" c  test   -b"
+} -result {-a {"  -b "val\ } c test -b}
+
+tcltest::test split-2.10 {
+	quoted words with spaces with \\ at end
+} -body {
+	getopt::split "-a  \"\\\"  -b \\\"val\\\\ \\\\\" c  test   -b"
+} -result {-a \"\ \ -b\ \"val\\\ \\ c test -b}
+
+tcltest::test split-2.11 {
+	quoted words with spaces with \" at end
+} -body {
+	getopt::split "-a  \"\\\"  -b \\\"val\\\\ \\\"\" c  test   -b"
+} -result {-a {"  -b "val\ "} c test -b}
+
+tcltest::test split-3.0 {
+	words + quoted words
+} -body {
+	getopt::split "-a  bc\"\\\"  d \\\"val\\\\ \\\"\"ef\"gh ij\"kl c  test   -b"
+} -result {-a {bc"  d "val\ "efgh ijkl} c test -b}
+
+tcltest::cleanupTests
