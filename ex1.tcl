@@ -7,8 +7,8 @@ proc opts_parse {_priv oname oval} {
  upvar 2 $_priv priv
 
  switch $oname {
- b -
- d {
+ -b -
+ -d {
   lappend priv [list $oname $oval]
   return 1
  }
@@ -20,7 +20,9 @@ proc opts_parse {_priv oname oval} {
  return 0
 }
 
-set argv {-abc arg -d val -l name}
+if {[llength $argv] == 0} {
+	set argv {-abc arg -d val -l name}
+}
 set priv {}
 getopt::parse {opts_parse priv} argv
 puts "opts: $priv"
