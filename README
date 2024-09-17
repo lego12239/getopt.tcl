@@ -50,10 +50,10 @@ Example:
 will do the next calls in order (assume that opts_parse return 1 only for
 b and d):
 
-- opts_parse priv a bc
-- opts_parse priv b c
-- opts_parse priv d val
-- opts_parse priv l name
+- opts_parse priv -a bc
+- opts_parse priv -b c
+- opts_parse priv -d val
+- opts_parse priv -l name
 
 argv is {arg name}.
 
@@ -97,8 +97,8 @@ proc opts_parse {_priv oname oval} {
 	upvar 2 $_priv priv
 
 	switch $oname {
-	b -
-	d {
+	-b -
+	-d {
 		lappend priv [list $oname $oval]
 		return 1
 	}
