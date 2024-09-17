@@ -36,7 +36,7 @@ proc parse {cb _argv} {
 		set opt_name ""
 		set arg [lindex $argv $i]
 		if {$opt_list ne ""} {
-			set opt_name [string index $opt_list 0]
+			set opt_name "-[string index $opt_list 0]"
 			set opt_list [string range $opt_list 1 end]
 			if {$opt_list ne ""} {
 				set opt_arg [string range $opt_list 0 end]
@@ -53,11 +53,11 @@ proc parse {cb _argv} {
 			--* {
 				set pos [string first = $arg]
 				if {$pos > 0} {
-					set opt_name [string range $arg 2 $pos-1]
+					set opt_name [string range $arg 0 $pos-1]
 					set opt_arg [string range $arg $pos+1 end]
 					set do_shift 1
 				} else {
-					set opt_name [string range $arg 2 end]
+					set opt_name [string range $arg 0 end]
 					set opt_arg [lindex $argv $i+1]
 					set argv [lreplace $argv $i $i]
 				}
