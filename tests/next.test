@@ -20,7 +20,7 @@ tcltest::test next-1.0 {
 		error "opts not empty: '$opts'"
 	}
 	return $res
-} -result {{a {}}}
+} -result {{-a {}}}
 
 tcltest::test next-1.1 {
 	2 opts
@@ -32,7 +32,7 @@ tcltest::test next-1.1 {
 		error "opts not empty: '$opts'"
 	}
 	return $res
-} -result {{a -v} {v {}}}
+} -result {{-a -v} {-v {}}}
 
 tcltest::test next-1.2 {
 	3 opts
@@ -44,7 +44,7 @@ tcltest::test next-1.2 {
 		error "opts not empty: '$opts'"
 	}
 	return $res
-} -result {{a -v} {v -d} {d {}}}
+} -result {{-a -v} {-v -d} {-d {}}}
 
 tcltest::test next-1.3 {
 	2 opts(glued)
@@ -56,7 +56,7 @@ tcltest::test next-1.3 {
 		error "opts not empty: '$opts'"
 	}
 	return $res
-} -result {{a v} {v {}}}
+} -result {{-a v} {-v {}}}
 
 tcltest::test next-1.4 {
 	3 opts(glued)
@@ -68,7 +68,7 @@ tcltest::test next-1.4 {
 		error "opts not empty: '$opts'"
 	}
 	return $res
-} -result {{a vd} {v d} {d {}}}
+} -result {{-a vd} {-v d} {-d {}}}
 
 tcltest::test next-1.5 {
 	1 opt, with non opts
@@ -80,7 +80,7 @@ tcltest::test next-1.5 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a nonopts}}
+} -result {{-a nonopts}}
 
 tcltest::test next-1.6 {
 	2 opts, with non opts
@@ -92,7 +92,7 @@ tcltest::test next-1.6 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a nonopts} {v args}}
+} -result {{-a nonopts} {-v args}}
 
 tcltest::test next-1.7 {
 	3 opts, with non opts
@@ -104,7 +104,7 @@ tcltest::test next-1.7 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a nonopts} {v args} {d 1}}
+} -result {{-a nonopts} {-v args} {-d 1}}
 
 tcltest::test next-2.0 {
 	0 opts
@@ -128,7 +128,7 @@ tcltest::test next-3.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a d} {d m}}
+} -result {{-a d} {-d m}}
 
 tcltest::test next-3.1 {
 	2 opts
@@ -140,7 +140,7 @@ tcltest::test next-3.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a o} {d m}}
+} -result {{-a o} {-d m}}
 
 tcltest::test next-3.2 {
 	5 opts
@@ -152,7 +152,7 @@ tcltest::test next-3.2 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a -d} {d -b} {b -D} {D -e} {e {}}}
+} -result {{-a -d} {-d -b} {-b -D} {-D -e} {-e {}}}
 
 tcltest::test next-3.3 {
 	5 opts
@@ -164,16 +164,16 @@ tcltest::test next-3.3 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {{a dbD} {d bD} {b D} {D -e} {e {}}}
+} -result {{-a dbD} {-d bD} {-b D} {-D -e} {-e {}}}
 
 proc next-4.0_cb {_accu oname oarg} {
 	upvar 2 $_accu accu
 
 	switch $oname {
-	d -
-	debug -
-	l -
-	log-level {
+	-d -
+	--debug -
+	-l -
+	--log-level {
 		lappend accu [list $oname $oarg]
 		return 1
 	}
@@ -195,7 +195,7 @@ tcltest::test next-4.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {d -b} D e}
+} -result {-a {-d -b} -D -e}
 
 tcltest::test next-4.1 {
 	opt with arg
@@ -207,7 +207,7 @@ tcltest::test next-4.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l {}}}
+} -result {-a {-l {}}}
 
 tcltest::test next-4.1.1 {
 	opt with args(glued)
@@ -219,7 +219,7 @@ tcltest::test next-4.1.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l {}}}
+} -result {-a {-l {}}}
 
 tcltest::test next-4.2 {
 	long opt with arg
@@ -231,7 +231,7 @@ tcltest::test next-4.2 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {log-level {}}}
+} -result {-a {--log-level {}}}
 
 tcltest::test next-4.3.0 {
 	opt with arg
@@ -243,7 +243,7 @@ tcltest::test next-4.3.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.3.0.1 {
 	opt with arg
@@ -255,7 +255,7 @@ tcltest::test next-4.3.0.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.3.1 {
 	opt with arg(glued)
@@ -267,7 +267,7 @@ tcltest::test next-4.3.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.3.2 {
 	opt with arg(glued)
@@ -279,7 +279,7 @@ tcltest::test next-4.3.2 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.4.0 {
 	opt with arg (sep arg)
@@ -291,7 +291,7 @@ tcltest::test next-4.4.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.4.0.1 {
 	opt with arg (sep arg)
@@ -303,7 +303,7 @@ tcltest::test next-4.4.0.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.4.1 {
 	opt with arg (glued, sep arg)
@@ -315,7 +315,7 @@ tcltest::test next-4.4.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.4.1.1 {
 	opt with arg (glued, sep arg)
@@ -327,7 +327,7 @@ tcltest::test next-4.4.1.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {l 0123} b}
+} -result {-a {-l 0123} -b}
 
 tcltest::test next-4.5.0 {
 	long opt with arg (=)
@@ -339,7 +339,7 @@ tcltest::test next-4.5.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {log-level 0123} b}
+} -result {-a {--log-level 0123} -b}
 
 tcltest::test next-4.5.0.1 {
 	long opt with arg (=)
@@ -351,7 +351,7 @@ tcltest::test next-4.5.0.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {log-level 0123} b}
+} -result {-a {--log-level 0123} -b}
 
 tcltest::test next-4.5.0.2 {
 	long opt with arg (=)
@@ -363,7 +363,7 @@ tcltest::test next-4.5.0.2 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {unknown {log-level 0123} b}
+} -result {--unknown {--log-level 0123} -b}
 
 tcltest::test next-4.5.0.3 {
 	long opt with arg (=)
@@ -375,7 +375,7 @@ tcltest::test next-4.5.0.3 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {unknown {log-level 0123} b}
+} -result {--unknown {--log-level 0123} -b}
 
 tcltest::test next-4.6.0 {
 	long opt with arg (sep arg)
@@ -387,7 +387,7 @@ tcltest::test next-4.6.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {log-level 0123} b}
+} -result {-a {--log-level 0123} -b}
 
 tcltest::test next-4.6.0.1 {
 	long opt with arg (sep arg)
@@ -399,7 +399,7 @@ tcltest::test next-4.6.0.1 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {log-level 0123} b}
+} -result {-a {--log-level 0123} -b}
 
 tcltest::test next-5.0 {
 	opt with arg (glued)
@@ -411,7 +411,7 @@ tcltest::test next-5.0 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {d 456}}
+} -result {-a {-d 456}}
 
 tcltest::test next-7.0 {
 	--
@@ -447,7 +447,7 @@ tcltest::test next-7.2 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a}
+} -result {-a}
 
 tcltest::test next-7.3 {
 	--
@@ -459,7 +459,7 @@ tcltest::test next-7.3 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a version}
+} -result {-a --version}
 
 tcltest::test next-7.4 {
 	--
@@ -471,7 +471,7 @@ tcltest::test next-7.4 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {d -b} version c}
+} -result {-a {-d -b} --version -c}
 
 tcltest::test next-7.5 {
 	-- escaped
@@ -483,7 +483,7 @@ tcltest::test next-7.5 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {d o} b version {l --} {d o}}
+} -result {-a {-d o} -b --version {-l --} {-d o}}
 
 tcltest::test next-7.6 {
 	--
@@ -495,7 +495,19 @@ tcltest::test next-7.6 {
 		error "opts is wrong: '$opts'"
 	}
 	return $res
-} -result {a {d o} b version {log-level --} {d o}}
+} -result {-a {-d o} -b --version {--log-level --} {-d o}}
+
+tcltest::test next-8 {
+	long opts with 1 char
+} -body {
+	set res ""
+	set opts {-a s --d o --b m --version e --log-level -- -d o m e}
+	getopt::parse {next-4.0_cb res} opts
+	if {$opts ne "s o m e m e"} {
+		error "opts is wrong: '$opts'"
+	}
+	return $res
+} -result {-a --d --b --version {--log-level --} {-d o}}
 
 
 tcltest::cleanupTests
