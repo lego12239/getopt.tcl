@@ -27,17 +27,24 @@ DESCRIPTION
 
 getopt::parse proc is used to parse a list of arguments with options and
 possible option arguments. It accept 2 arguments. The first is a callback
-command - a list with command name and arguments (if needed). This callback
-will be called on every option-value pair found in a list. It must return 0
-if option doesn't have an argument (text parsed as a possible option argument
-is'not used) and return 1 if option have an argument (text parsed as a
-possible option argument is used and must not be further processed). And the
+command - a list with command name and arguments (if needed). And the
 second argument is a var name of a list variable with arguments.
 
-Every found option(with its argument) is removed from command line items(
-specified in second argument to getopt::next) by getopt::next. Thus, after
-getopt::next finish, a list with command line words contains only non option
-words.
+This callback will be called on every option-value pair found in a list. It
+is called with 2 additional arguments added to the list supplied to
+getopt::parse - option name and possible option value. getopt::parse
+doesn't know is this option require a value or not; so, it parses argv as
+if every option require a value. And callback must tell through it return
+code if this option require a value. The callback must return 0 if option
+doesn't have an value and return 1 for option with a value. If callback
+returns 0, then a string interpreted as an option value is not removed from
+argv and parsed as usual in the next iteration. If callback returns 1, then
+option value is removed from argv.
+
+Every found option(with its value if return code is 1) is removed from argv
+specified in second argument to getopt::parse. Thus, after
+getopt::parse finish, a list with command line arguments contains only non
+option words.
 
 If getopt::parse get "--" as a next command line argument, then it finish
 options parsing and stay intact the next arguments.
