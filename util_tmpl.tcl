@@ -24,7 +24,7 @@ proc getopt_cb {_priv oname oval} {
 		exit 0
 	}
 	default {
-		puts "Unknown option: $oname"
+		puts stderr "Unknown option: $oname"
 		exit 1
 	}
 	}
@@ -37,3 +37,8 @@ proc getopt_cb {_priv oname oval} {
 #################################################################
 set priv {}
 getopt::parse {getopt_cb priv} argv
+
+if {[llength $argv] != 1} {
+	puts stderr "Not enough arguments!"
+	exit 1
+}
