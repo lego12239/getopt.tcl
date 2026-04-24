@@ -10,6 +10,18 @@ proc next-1.0_cb {_accu oname oarg} {
 	return 0
 }
 
+tcltest::test next-1.0.0 {
+	0 opt
+} -body {
+	set res ""
+	set opts {}
+	getopt::parse {next-1.0_cb res} opts
+	if {$opts ne ""} {
+		error "opts not empty: '$opts'"
+	}
+	return $res
+} -result {}
+
 tcltest::test next-1.0 {
 	1 opt
 } -body {
