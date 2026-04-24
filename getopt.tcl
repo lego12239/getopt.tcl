@@ -184,4 +184,4 @@ proc split {str} {
 }
 }
 
-package provide getopt 3.0.1
+package provide getopt 4.0
