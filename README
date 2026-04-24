@@ -10,7 +10,7 @@ SYNOPSIS
 package require getopt
 
 getopt::parse CALLBACK_CMD ARGV_VARNAME
-getopt::for {KEY_VARNAME VAL_VARNAME WITHARG_VARNAME} ARGV_VARNAME BODY
+getopt::for {KEY_VARNAME VAL_VARNAME WITHVAL_VARNAME} ARGV_VARNAME BODY
 getopt::split STRING
 
 
@@ -79,7 +79,7 @@ option can have a value specified separated with equal sign or space. Like
 
 getopt::for proc is used to parse args too. But have a foreach-like syntax.
 It accept 3 arguments. The first is a list with variable names: a variable
-name for key, a variable name for value and a variable name for witharg flag.
+name for key, a variable name for value and a variable name for withval flag.
 The second argument is the same as for getopt::parse - a var name of a list
 variable with arguments to parse. The third argument is a body that executed
 for every parsed option. Example:
@@ -89,7 +89,7 @@ getopt::for {oname oval with_val} argv {
 	puts "$oname = $oval"
 }
 
-In the body, witharg flag should be set to 0 if an option doesn't have a
+In the body, withval flag should be set to 0 if an option doesn't have a
 value and to 1 for option with a value. It purpose the same as getopt::parse
 callback return value.
 

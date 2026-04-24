@@ -14,8 +14,8 @@ proc show_help {} {
 proc parse_opts {_argv} {
 	upvar $_argv argv
 
-	getopt::for {oname oval with_arg} argv {
-		set with_arg 0
+	getopt::for {oname oval with_val} argv {
+		set with_val 0
 		switch $oname {
 		-h -
 		--help {
