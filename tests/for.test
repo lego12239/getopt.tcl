@@ -1,0 +1,151 @@
+lappend auto_path [pwd]/../
+package require tcltest
+package require getopt
+
+
+tcltest::test for-1.0.0 {
+	0 vars
+} -body {
+	set res ""
+	set opts {-a}
+	getopt::for {} opts {
+		lappend res 1
+	}
+	return $res
+} -returnCodes error -result "There must be 3 variables names: key_varname  val_varname flag_varname"
+
+tcltest::test for-1.1.0 {
+	1 vars
+} -body {
+	set res ""
+	set opts {-a}
+	getopt::for {oname} opts {
+		lappend res 1
+	}
+	return $res
+} -returnCodes error -result "There must be 3 variables names: key_varname  val_varname flag_varname"
+
+tcltest::test for-1.2.0 {
+	2 vars
+} -body {
+	set res ""
+	set opts {-a}
+	getopt::for {oname oval} opts {
+		lappend res 1
+	}
+	return $res
+} -returnCodes error -result "There must be 3 variables names: key_varname  val_varname flag_varname"
+
+tcltest::test for-1.3.0 {
+	4 vars
+} -body {
+	set res ""
+	set opts {-a}
+	getopt::for {oname oval with_arg q} opts {
+		lappend res 1
+	}
+	return $res
+} -returnCodes error -result "There must be 3 variables names: key_varname  val_varname flag_varname"
+
+tcltest::test for-2.0 {
+	err
+} -body {
+	set res ""
+	set opts {-a}
+	getopt::for {oname oval with_arg} opts {
+		error "bad opt"
+	}
+	return $res
+} -returnCodes error -result "bad opt"
+
+tcltest::test for-3.0 {
+	break
+} -body {
+	set res ""
+	set opts {-a -q -D}
+	getopt::for {oname oval with_arg} opts {
+		set with_arg 0
+		lappend res $oname
+		if {$oname eq "-q"} {
+			break
+		}
+	}
+	if {$opts ne "-D"} {
+		error "opts is wrong: '$opts'"
+	}
+	return $res
+} -result {-a -q}
+
+tcltest::test for-3.1 {
+	break
+} -body {
+	set res ""
+	set opts {-aqD -s}
+	getopt::for {oname oval with_arg} opts {
+		set with_arg 0
+		lappend res $oname
+		if {$oname eq "-q"} {
+			break
+		}
+	}
+	if {$opts ne "-aqD -s"} {
+		error "opts is wrong: '$opts'"
+	}
+	return $res
+} -result {-a -q}
+
+tcltest::test for-4.0 {
+	vals
+} -body {
+	set res ""
+	set opts {-a -q -D -s}
+	getopt::for {oname oval with_arg} opts {
+		set with_arg 0
+		lappend res [list $oname $oval]
+		if {$oname eq "-q"} {
+			set with_arg 1
+		}
+	}
+	if {$opts ne ""} {
+		error "opts is wrong: '$opts'"
+	}
+	return $res
+} -result {{-a -q} {-q -D} {-s {}}}
+
+tcltest::test for-4.1 {
+	vals
+} -body {
+	set res ""
+	set opts {-aqD -s}
+	getopt::for {oname oval with_arg} opts {
+		set with_arg 0
+		lappend res [list $oname $oval]
+		if {$oname eq "-q"} {
+			set with_arg 1
+		}
+	}
+	if {$opts ne ""} {
+		error "opts is wrong: '$opts'"
+	}
+	return $res
+} -result {{-a qD} {-q D} {-s {}}}
+
+tcltest::test for-4.2 {
+	vals
+} -body {
+	set res ""
+	set opts {-aqD -s}
+	getopt::for {oname oval with_arg} opts {
+		set with_arg 0
+		lappend res [list $oname $oval]
+		if {$oname eq "-a"} {
+			set with_arg 1
+		}
+	}
+	if {$opts ne ""} {
+		error "opts is wrong: '$opts'"
+	}
+	return $res
+} -result {{-a qD} {-s {}}}
+
+tcltest::cleanupTests
