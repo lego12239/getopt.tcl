@@ -27,9 +27,31 @@
 namespace eval getopt {
 proc parse {cb _argv} {
 	upvar $_argv argv
-	set opt_arg ""
+
+	uplevel [list getopt::_parse $cb $_argv]
+}
+
+proc for {kvf _argv body} {
+	upvar $_argv argv
+
+	if {[llength $kvf] != 3} {
+		throw {GETOPT FOR_ERR} "There must be 3 variables names: key_varname \
+		  val_varname flag_varname"
+	}
+	_parse $body argv $kvf
+}
+
+proc _parse {cb _argv {kvf {}}} {
+	upvar $_argv argv
 	set opt_list ""
 	set do_shift 0
+
+	if {[llength $kvf] ne 0} {
+		upvar 2 [lindex $kvf 0] opt_name
+		upvar 2 [lindex $kvf 1] opt_arg
+		upvar 2 [lindex $kvf 2] with_arg
+	}
+	set opt_arg ""
 
 	set i 0
 	while {$i < [llength $argv]} {
@@ -74,7 +96,22 @@ proc parse {cb _argv} {
 
 #		puts "1: $argv, opt_list='$opt_list', opt_name='$opt_name', opt_arg='$opt_arg'"
 		if {$opt_name ne ""} {
-			if {[{*}$cb $opt_name $opt_arg] || $do_shift} {
+			if {[llength $kvf] ne 0} {
+				switch [set rcode [catch {uplevel 2 $cb} ret]] {
+				1 -
+				2 {
+					# error, return
+					return -code $rcode -level 2 $ret
+				}
+				3 {
+					# break
+					return
+				}
+				}
+			} else {
+				set with_arg [{*}$cb $opt_name $opt_arg]
+			}
+			if {$with_arg || $do_shift} {
 				set argv [lreplace $argv $i $i]
 				set opt_list ""
 				set do_shift 0
@@ -94,7 +131,7 @@ proc split {str} {
 	set tmp ""
 
 	set len [string length $str]
-	for {set i 0} {$i < $len} {incr i} {
+	::for {set i 0} {$i < $len} {incr i} {
 		set c [string index $str $i]
 		switch $state {
 		0 {
