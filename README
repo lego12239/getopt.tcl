@@ -10,6 +10,7 @@ SYNOPSIS
 package require getopt
 
 getopt::parse CALLBACK_CMD ARGV_VARNAME
+getopt::for {KEY_VARNAME VAL_VARNAME WITHARG_VARNAME} ARGV_VARNAME BODY
 getopt::split STRING
 
 
@@ -36,10 +37,12 @@ getopt::parse - option name and possible option value. getopt::parse
 doesn't know is this option require a value or not; so, it parses argv as
 if every option require a value. And callback must tell through it return
 code if this option require a value. The callback must return 0 if option
-doesn't have an value and return 1 for option with a value. If callback
+doesn't have a value and return 1 for option with a value. If callback
 returns 0, then a string interpreted as an option value is not removed from
 argv and parsed as usual in the next iteration. If callback returns 1, then
-option value is removed from argv.
+option value is removed from argv. If you want to pass some variable by name
+into the callback, then you need "upvar 2" in the callback to access a frame
+where you call getopt::parse.
 
 Every found option(with its value if return code is 1) is removed from argv
 specified in second argument to getopt::parse. Thus, after
@@ -74,6 +77,22 @@ A long option is a word with two dashes in front of it. Like "--db". Long
 option can have a value specified separated with equal sign or space. Like
 "--db=name" or "--db name", where "name" is the value of "db" option.
 
+getopt::for proc is used to parse args too. But have a foreach-like syntax.
+It accept 3 arguments. The first is a list with variable names: a variable
+name for key, a variable name for value and a variable name for witharg flag.
+The second argument is the same as for getopt::parse - a var name of a list
+variable with arguments to parse. The third argument is a body that executed
+for every parsed option. Example:
+
+getopt::for {oname oval with_val} argv {
+	set with_val 0
+	puts "$oname = $oval"
+}
+
+In the body, witharg flag should be set to 0 if an option doesn't have a
+value and to 1 for option with a value. It purpose the same as getopt::parse
+callback return value.
+
 getopt::split is used to split a string with arguments into a list of
 arguments. It try to conform to shell style of argument splitting. E.g.
 the string - a bc"d\\e \"fg"hi jkl mno - is splitted to
@@ -93,8 +112,8 @@ rules.
 ERRORS
 ======
 
-On error getopt::split is throw an error with first item of errorCode
-list equal to 'GETOPT'.
+On error getopt::for and getopt::split is throw an error with first item of
+errorCode list equal to 'GETOPT'.
 
 
 EXAMPLES
@@ -124,4 +143,4 @@ puts "opts: $priv"
 puts "argv now is: $argv"
 
 
-See ex1.tcl.
+See ex1.tcl and ex2.tcl.
